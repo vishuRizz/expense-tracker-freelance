@@ -10,14 +10,14 @@ function App() {
   return (
     <BrowserRouter>
       <div className="App">
-        <h1>Expense Tracker</h1>
         <NavBar />
+        
         <Routes>
           <Route
             path="/"
             element={
               <>
-                <h2>Spend smarter, save more!</h2>
+                <h2 className="">Spend smarter, save more!</h2>
                 <h3>
                   Gain valuable insights into your spending habits and identify
                   areas for potential savings.
