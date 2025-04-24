@@ -3,26 +3,19 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import Registration from "./components/Registration";
 import Login from "./components/Login";
-import NavBar from "./components/NavBar";
 import User from "./components/User";
+import ExpenseTrackerLandingPage from "./pages/MainPage";
 
 function App() {
+  const userId = localStorage.getItem("user_id");
   return (
     <BrowserRouter>
       <div className="App">
-        <NavBar />
-        
         <Routes>
           <Route
             path="/"
             element={
-              <>
-                <h2 className="">Spend smarter, save more!</h2>
-                <h3>
-                  Gain valuable insights into your spending habits and identify
-                  areas for potential savings.
-                </h3>
-              </>
+             <ExpenseTrackerLandingPage/>
             }
           />
           <Route path="/Login" element={<Login />} />

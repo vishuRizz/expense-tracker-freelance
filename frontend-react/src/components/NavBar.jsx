@@ -1,29 +1,55 @@
+import { useState } from "react";
 import { Link, useMatch, useResolvedPath } from "react-router-dom";
 
 export default function NavBar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const userId = localStorage.getItem("user_id");
+
   const styles = {
     navBar: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '20px',
-      backgroundColor: '#333',
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      backgroundColor: '#1a1a1a',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+      color: '#fff',
+      position: 'relative',
+      zIndex: 1000,
     },
     titleHome: {
-      color: '#fff',
-      textDecoration: 'none',
       fontSize: '24px',
       fontWeight: 'bold',
-      transition: 'color 0.3s',
+      color: '#fff',
+      textDecoration: 'none',
     },
-    titleHomeHover: {
-      color: '#007bff',
+    menuToggle: {
+      display: 'none',
+      background: 'none',
+      border: 'none',
+      color: '#fff',
+      fontSize: '24px',
+      cursor: 'pointer',
     },
     ul: {
       listStyle: 'none',
       display: 'flex',
       gap: '20px',
+      margin: 0,
+      padding: 0,
+    },
+    mobileUl: {
+      listStyle: 'none',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '16px',
+      marginTop: '12px',
+      padding: '12px 0',
+      backgroundColor: '#222',
+      position: 'absolute',
+      top: '70px',
+      left: 0,
+      width: '100%',
     },
     li: {
       position: 'relative',
@@ -35,44 +61,78 @@ export default function NavBar() {
       transition: 'color 0.3s',
     },
     linkHover: {
-      color: '#007bff',
+      color: '#00aaff',
     },
     active: {
       fontWeight: 'bold',
+      color: '#00aaff',
     },
     activeAfter: {
       content: '""',
       position: 'absolute',
       width: '100%',
       height: '2px',
-      backgroundColor: '#007bff',
+      backgroundColor: '#00aaff',
       bottom: '-4px',
       left: '0',
-      transition: 'width 0.3s',
     },
+    responsive: {
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    mediaQuery: `@media (max-width: 768px)`
   };
+
+  const navItems = [
+    { to: "/register", label: "Register" },
+    { to: "/login", label: "Log In" },
+    { to: userId ? `/userPage/${userId}` : "/login", label: "My Account" },
+    { to: "/logout", label: "Sign Out" }
+  ];
 
   return (
     <nav style={styles.navBar}>
-      <Link to="/" style={styles.titleHome} onMouseOver={(e) => (e.currentTarget.style.color = styles.titleHomeHover.color)} onMouseOut={(e) => (e.currentTarget.style.color = styles.titleHome.color)}>
+      <Link
+        to="/"
+        style={styles.titleHome}
+        onMouseOver={(e) => (e.currentTarget.style.color = styles.linkHover.color)}
+        onMouseOut={(e) => (e.currentTarget.style.color = styles.titleHome.color)}
+      >
         Home
       </Link>
-      <ul style={styles.ul}>
-        <Content to="/register" styles={styles}>
-          Register
-        </Content>
-        <Content to="/login" styles={styles}>
-          Log In
-        </Content>
-        <Content to="/Login" styles={styles}>
-          Sign Out
-        </Content>
+
+      {/* Menu Toggle Button for Mobile */}
+      <button
+        style={{ ...styles.menuToggle, ...(window.innerWidth <= 768 ? { display: 'block' } : {}) }}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        ☰
+      </button>
+
+      {/* Desktop Menu */}
+      <ul style={{ ...styles.ul, ...(window.innerWidth <= 768 ? { display: 'none' } : {}) }}>
+        {navItems.map((item) => (
+          <Content key={item.to} to={item.to} styles={styles}>
+            {item.label}
+          </Content>
+        ))}
       </ul>
+
+      {/* Mobile Menu */}
+      {isOpen && window.innerWidth <= 768 && (
+        <ul style={styles.mobileUl}>
+          {navItems.map((item) => (
+            <Content key={item.to} to={item.to} styles={styles} onClick={() => setIsOpen(false)}>
+              {item.label}
+            </Content>
+          ))}
+        </ul>
+      )}
     </nav>
   );
 }
 
-function Content({ to, children, styles, ...props }) {
+function Content({ to, children, styles, onClick }) {
   const resolved = useResolvedPath(to);
   const isActive = useMatch({ path: resolved.pathname, end: true });
 
@@ -80,14 +140,17 @@ function Content({ to, children, styles, ...props }) {
     <li style={styles.li} className={isActive ? "active" : ""}>
       <Link
         to={to}
-        style={styles.link}
+        style={isActive ? { ...styles.link, ...styles.active } : styles.link}
+        onClick={onClick}
         onMouseOver={(e) => (e.currentTarget.style.color = styles.linkHover.color)}
-        onMouseOut={(e) => (e.currentTarget.style.color = styles.link.color)}
-        {...props}
+        onMouseOut={(e) =>
+          (e.currentTarget.style.color = isActive
+            ? styles.active.color
+            : styles.link.color)
+        }
       >
         {children}
       </Link>
-      {isActive && <div style={styles.activeAfter} />}
     </li>
   );
 }
